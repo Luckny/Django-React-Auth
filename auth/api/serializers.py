@@ -7,9 +7,12 @@ source: https://www.django-rest-framework.org/api-guide/serializers/
 """
 
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import User
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+    id = serializers.UUIDField(read_only=True)
+        
     class Meta: 
         model = User
-        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'date_joined']
+        fields = ['id', 'email', 'password']
