@@ -22,7 +22,6 @@ jobs:
           pip install -r requirements.txt
       - name: Run Tests
         run: |
-          cd auth
-          python manage.py test
+          cd auth/ && python manage.py test
           
           
