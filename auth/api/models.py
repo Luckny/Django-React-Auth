@@ -19,12 +19,16 @@ class UserManager(BaseUserManager):
         user = self.model(
             email=self.normalize_email(email), **extras
         )  # unsaved user model with normalized email
+
         user.set_password(password)  # takes care of hashing
         user.save()
         return user
 
     def create_superuser(self, email, password):
+        # create a user
         user = self.create_user(email=email, password=password)
+
+        # add privileges
         user.is_superuser = True
         user.is_staff = True
         user.save()
@@ -35,9 +39,16 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(unique=True)
-
     is_staff = models.BooleanField(default=False)
+    is_email_confirmed = models.BooleanField(default=False)
 
     USERNAME_FIELD = "email"
 
     objects = UserManager()
+
+
+class EmailConfirmationToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+
+    # one user has one confirmation token
+    user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -149,3 +149,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Required to change the default model auth.User
 AUTH_USER_MODEL = "api.User"
+
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
