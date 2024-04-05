@@ -79,21 +79,25 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+# use sqlite for testing
+
+
+import sys
+def is_test():
+    return 'test' in sys.argv or 'test_coverage' in sys.argv
+
+# DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
-        'HOST': os.environ.get('DB_HOST'),
-        'PORT': os.environ.get('DB_PORT')
+        'ENGINE': 'django.db.backends.sqlite3' if is_test() else 'django.db.backends.mysql',
+        'NAME': 'mydatabase' if is_test() else os.environ.get('DB_NAME'),
+        'USER': None if is_test() else os.environ.get('DB_USER'),
+        'PASSWORD':None if is_test() else os.environ.get('DB_PASS'),
+        'HOST':None if is_test() else os.environ.get('DB_HOST'),
+        'PORT':None if is_test() else os.environ.get('DB_PORT')
     }
 }
-# use sqlite for testing
-import sys
-if 'test' in sys.argv or 'test_coverage' in sys.argv: #Covers regular testing and django-coverage
-    DATABASES['default']['ENGINE'] = 'django.db.backends.sqlite3'
 
 
 
