@@ -18,6 +18,13 @@ class UsersAPITests(APITestCase):
         self.assertIsNotNone(user)
         # check password built in function. asserting equal would fail because of hashing
         self.assertTrue(user.check_password(body['password']))
+    
+    def test_signup_no_email(self):
+        # creating a user with no email will raise a value error
+        with self.assertRaises(ValueError):
+            User.objects.create_user(email='', password=self.default_test_password)      
+        
+
         
     def test_signup_no_double_emails(self):
         # user in database
@@ -29,6 +36,20 @@ class UsersAPITests(APITestCase):
         response = self.client.post(url, body, format='json')
         # reponse should have status code of 400 (bad request)
         self.assertEqual(response.status_code, 400)
+        
+    def test_create_super_user_working(self):
+        user =  User.objects.create_superuser(email=self.default_test_email, password=self.default_test_password)      
+
+        # filter returns a list of users
+        user = User.objects.filter(email=self.default_test_email).first()
+        # should be defined
+        self.assertIsNotNone(user)
+        # should be super user
+        self.assertTrue(user.is_superuser)
+        # should have staff privilege
+        self.assertTrue(user.is_staff)
+        # check password built in function. asserting equal would fail because of hashing
+        self.assertTrue(user.check_password(self.default_test_password))
         
     def test_login_working(self):
         # user in database
