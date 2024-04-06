@@ -91,7 +91,7 @@ class UsersAPITests(APITestCase):
         # reponse should have status code of 400 (Bad request)
         self.assertEqual(response.status_code, 400)
 
-    def test_email_confirmation_valid(self):
+    def test_email_confirmation(self):
         # register user
         self.register_default_user()
 
@@ -109,25 +109,8 @@ class UsersAPITests(APITestCase):
         body = {"token_id": token.pk, "user_id": user.pk}
         # should validate email
         response = self.client.post(url, body, format="json")
-        # should redirect to user detail view
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
         # response is_email_confirmed should be true
         user.refresh_from_db()
         self.assertTrue(user.is_email_confirmed)
-
-    def test_email_confirmation_view(self):
-        # register user
-        self.register_default_user()
-        # get the new user
-        user = User.objects.filter(email=self.default_email).first()
-        # user's token should exist
-        token = EmailConfirmationToken.objects.filter(user=user).first()
-
-        url = reverse("api:confirm", args=[token.pk, user.pk])
-        body = {"token_id": token.pk, "user_id": user.pk}
-        # should validate email
-        response = self.client.get(url, body, format="json")
-
-        # should have 200 response
-        self.assertEqual(response.status_code, 200)

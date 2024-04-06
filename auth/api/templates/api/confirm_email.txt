@@ -1,3 +1,0 @@
-Confirm your email address by clicking on the following link: 
-
-http://127.0.0.1:8000/api/confirm/{{token_id}}/{{user_id}}
