@@ -1,3 +1,3 @@
 [flake8]
-exclude = auth/core/*
+exclude = server/core/*
 max-line-length = 88
