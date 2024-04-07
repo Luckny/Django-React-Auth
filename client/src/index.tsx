@@ -10,6 +10,9 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import Login from './pages/Login';
+import NotFound from './pages/NotFound';
+import Navbar from './components/Navbar';
 
 const darkTheme = createTheme({
   palette: {
@@ -17,7 +20,17 @@ const darkTheme = createTheme({
   },
 });
 
-const router = createBrowserRouter([{ path: '/', element: <Home /> }]);
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Navbar />,
+    children: [
+      { path: '/', element: <Home /> },
+      { path: '/login', element: <Login /> },
+    ],
+  },
+  { path: '*', element: <NotFound /> },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,

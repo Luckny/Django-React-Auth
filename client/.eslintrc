@@ -21,7 +21,8 @@
             {
                 "tsx": "never"
             }
-        ]
+        ],
+        "no-console": "warn"
     },
     "settings": {
         "import/resolver": {
