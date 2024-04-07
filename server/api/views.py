@@ -1,7 +1,8 @@
 from django.forms import ValidationError
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
 from .serializers import UserSerializer
 from .models import User, EmailConfirmationToken
 from .utils import send_confirmation_email
@@ -15,35 +16,49 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-    # overing saving method
+    # overriden create method for login user token management
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        access_token, created = Token.objects.get_or_create(user=serializer.instance)
+        return Response(
+            data={"user": serializer.data, "access_token": access_token.key},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+    # overriding saving method
     def perform_create(self, serializer):
         # save the user
         user = serializer.save()
 
         # create the email confirmation token
-        token = EmailConfirmationToken.objects.create(user=user)
+        email_token = EmailConfirmationToken.objects.create(user=user)
 
         try:
             # send email for confirmation
-            send_confirmation_email(user.email, token.pk, user.pk)
+            send_confirmation_email(user.email, email_token.pk, user.pk)
         except Exception as e:  # pragma no cover
-            # If sending email fails, delete the user and token
+            # If sending email fails, delete the user and email_token
             user.delete()
-            token.delete()
+            email_token.delete()
 
             print("Failed to send confirmation email:", e)  # debugging
 
             raise ValidationError("Failed to send confirmation email.")
 
 
+# end point for confirming a user's email address
 @api_view(["POST"])
 def confirm_email_view(request, token_id, user_id):
-    token = get_object_or_404(EmailConfirmationToken, pk=token_id)
+    email_token = get_object_or_404(EmailConfirmationToken, pk=token_id)
 
-    # get user from token
-    user = token.user
+    # get user from email_toek
+    user = email_token.user
 
-    # compare token's user with user_id from param
+    # compare email_token's user with user_id from param
     if user.pk == user_id:
         user.is_email_confirmed = True  # confirm email
         user.save()
