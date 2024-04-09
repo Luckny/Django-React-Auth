@@ -22,7 +22,7 @@
                 "tsx": "never"
             }
         ],
-        "no-console": "warn"
+        "object-curly-newline": "off"
     },
     "settings": {
         "import/resolver": {
