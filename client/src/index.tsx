@@ -4,6 +4,7 @@ import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './pages/Home';
+import { AuthContextProvider } from './contexts/AuthContext/AuthContext';
 
 // For material ui
 import '@fontsource/roboto/300.css';
@@ -13,6 +14,7 @@ import '@fontsource/roboto/700.css';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Navbar';
+import Signup from './pages/Signup';
 
 const darkTheme = createTheme({
   palette: {
@@ -27,6 +29,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
+      { path: '/signup', element: <Signup /> },
     ],
   },
   { path: '*', element: <NotFound /> },
@@ -37,8 +40,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={darkTheme}>
-      <RouterProvider router={router} />
-    </ThemeProvider>
+    <AuthContextProvider>
+      <ThemeProvider theme={darkTheme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </AuthContextProvider>
   </React.StrictMode>,
 );
