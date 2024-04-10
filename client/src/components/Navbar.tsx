@@ -6,8 +6,11 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link, Outlet } from 'react-router-dom';
 import { Grid } from '@mui/material';
+import useLogout from '../pages/Login/useLogout';
 
 export default function Navbar() {
+  const { logout } = useLogout();
+  const handleClick = () => logout();
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
@@ -18,6 +21,9 @@ export default function Navbar() {
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   Home
                 </Typography>
+              </Button>
+              <Button onClick={handleClick} color="inherit">
+                Log out
               </Button>
               <Button component={Link} to="/login" color="inherit">
                 Login

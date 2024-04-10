@@ -1,20 +1,22 @@
 import React, { createContext, useCallback, useReducer, useMemo } from 'react';
+
+import { logoutAction } from '../../constants';
 import {
-  IAction,
-  IAuthContext,
-  IAuthState,
-  IUserPayload,
+  TAuthContext,
+  AuthState,
+  UserAction,
+  UserPayload,
 } from '../../types/AuthTypes';
 
 // initial authenticate state of the context
-const initialAuthState: IAuthState = {
+const initialAuthState: AuthState = {
   isAuthenticated: false,
   user: undefined,
   accessToken: undefined,
 };
 
 // custom authentification context
-export const AuthContext = createContext<IAuthContext | undefined>(undefined);
+export const AuthContext = createContext<TAuthContext | undefined>(undefined);
 
 // reducer actions
 const actions = {
@@ -28,7 +30,10 @@ const actions = {
  * @param action The action object that describes the state change.
  * @returns The new authentication state based on the action.
  */
-export const authReducer = (state: IAuthState, action: IAction): IAuthState => {
+export const authReducer = (
+  state: AuthState,
+  action: UserAction,
+): AuthState => {
   // Switch statement to handle different action types
   switch (action.type) {
     // For register and login
@@ -53,16 +58,20 @@ export function AuthContextProvider({ children }: any) {
   // eslint-disable-next-line no-console
   console.log('AuthContext state: ', state); // debugging
 
-  const setUser = useCallback((payload: IUserPayload) => {
+  const setUser = useCallback((payload: UserPayload) => {
     dispatch({
       type: actions.LOGIN,
       payload,
     });
   }, []);
 
+  const removeUser = useCallback(() => {
+    dispatch(logoutAction);
+  }, []);
+
   const authContextProviderValue = useMemo(
-    () => ({ ...state, setUser }),
-    [setUser, state],
+    () => ({ ...state, setUser, removeUser }),
+    [setUser, state, removeUser],
   );
 
   return (

@@ -1,29 +1,36 @@
-export interface IUser {
-  id: string;
-  email: string;
-  isEmailVerified: boolean;
-}
+export type User =
+  | {
+      id: string;
+      email: string;
+      isEmailVerified: boolean;
+    }
+  | undefined;
 
-export interface IAuthState {
+export type AuthState = {
   isAuthenticated: boolean;
-  user: IUser | undefined;
+  user: User | undefined;
   accessToken: string | undefined;
-}
+};
 
-export interface IUserPayload {
-  user: IUser | undefined;
+export type UserPayload = {
+  user: User | undefined;
   access_token: string | undefined;
-}
+};
 
-export interface IAuthContext {
+export type TAuthContext = {
   isAuthenticated: boolean;
-  user: IUser | undefined;
+  user: User | undefined;
   // eslint-disable-next-line no-unused-vars
-  setUser: (payload: IUserPayload) => void;
+  setUser: (payload: UserPayload) => void;
+  removeUser: () => void;
   accessToken: string | undefined;
-}
+};
 
-export interface IAction {
+export type UserAction = {
   type: string;
-  payload: IUserPayload;
-}
+  payload: UserPayload;
+};
+
+export type UserError = {
+  email: string[];
+} | null;
