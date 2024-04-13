@@ -3,7 +3,11 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from .serializers import UserSerializer
+from rest_framework.permissions import AllowAny
+
+# from rest_framework.authtoken.serializers import AuthTokenSerializer
+from rest_framework.views import APIView
+from .serializers import UserSerializer, ObtainAuthTokenSerializer
 from .models import User, EmailConfirmationToken
 from .utils import send_confirmation_email
 from django.shortcuts import get_object_or_404
@@ -63,3 +67,19 @@ def confirm_email_view(request, token_id, user_id):
         user.is_email_confirmed = True  # confirm email
         user.save()
         return Response({"message": "email confirmed succesfully"}, status=200)
+
+
+# custum class for login and token
+class ObtainAuthToken(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = ObtainAuthTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, created = Token.objects.get_or_create(user=user)
+        return Response(
+            data={"user": serializer.data, "access_token": token.key},
+            status=status.HTTP_200_OK,
+        )
