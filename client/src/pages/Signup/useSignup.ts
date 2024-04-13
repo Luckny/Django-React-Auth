@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 import { SIGNUP_URL } from '../../constants';
-import { UserError, UserPayload } from '../../types/AuthTypes';
+import { ValidationError, UserPayload } from '../../types/AuthTypes';
 
 export default function useSignup() {
-  const [error, setError] = useState<UserError>(null);
+  const [errors, setErrors] = useState<ValidationError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { setUser } = useAuthContext();
 
@@ -15,7 +15,7 @@ export default function useSignup() {
     // Start loading on function call
     setIsLoading(true);
     // reset error
-    setError({ email: [] });
+    setErrors({ email: [] });
     try {
       const { data } = await axios.post<UserPayload>(SIGNUP_URL, {
         email,
@@ -26,11 +26,13 @@ export default function useSignup() {
       setUser(data);
 
       setIsLoading(false);
-    } catch (e: any) {
+    } catch (e) {
       setIsLoading(false);
-      setError(e.response.data);
+      if (isAxiosError<ValidationError>(e)) setErrors(e.response?.data);
+      // eslint-disable-next-line no-console
+      else console.error(e);
     }
   };
 
-  return { signup, isLoading, error: error?.email[0] };
+  return { signup, isLoading, errors };
 }

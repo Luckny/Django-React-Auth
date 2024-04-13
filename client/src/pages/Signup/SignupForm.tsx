@@ -10,12 +10,13 @@ import {
 import React, { useState } from 'react';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import useSignup from './useSignup';
+import ApiError from '../../components/ApiError';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
 
   const [password, setPassword] = useState('');
-  const { signup, isLoading, error } = useSignup();
+  const { signup, isLoading, errors } = useSignup();
 
   // Function to handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -79,7 +80,7 @@ export default function Signup() {
             >
               Register
             </Button>
-            {error && <div>{error}</div>}
+            {errors && <ApiError errors={errors} />}
           </Box>
         </Grid>
       </Paper>

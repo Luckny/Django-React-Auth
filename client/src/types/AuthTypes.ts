@@ -31,6 +31,9 @@ export type UserAction = {
   payload: UserPayload;
 };
 
-export type UserError = {
-  email: string[];
-} | null;
+export type ValidationError =
+  | {
+      email?: string[];
+      non_field_errors?: string[];
+    }
+  | undefined;

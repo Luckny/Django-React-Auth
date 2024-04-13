@@ -10,15 +10,18 @@ import {
 import React, { useState } from 'react';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { Link } from 'react-router-dom';
+import useLogin from './useLogin';
+import ApiError from '../../components/ApiError';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
-
   const [password, setPassword] = useState('');
+  const { login, isLoading, errors } = useLogin();
 
   // Function to handle form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    await login(email, password);
   };
 
   return (
@@ -69,6 +72,7 @@ export default function Signup() {
             />
 
             <Button
+              disabled={isLoading}
               type="submit"
               fullWidth
               variant="contained"
@@ -76,6 +80,7 @@ export default function Signup() {
             >
               Log in
             </Button>
+            {errors && <ApiError errors={errors} />}
             <Grid container>
               <Grid item xs>
                 <Link to="/">Forgot password?</Link>

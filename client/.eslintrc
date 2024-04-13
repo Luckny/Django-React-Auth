@@ -2,8 +2,8 @@
     "extends": [
         "react-app",
         "react-app/jest",
-        "prettier",
-        "airbnb"
+        "airbnb",
+        "prettier"
     ],
     "rules": {
         "react/jsx-filename-extension": [
