@@ -47,7 +47,8 @@ class ObtainAuthTokenSerializer(serializers.ModelSerializer):
             if user:
                 # valid password
                 if user.check_password(password):
-                    pass
+                    attrs["user"] = user
+                    return attrs
                 else:
                     raise ValidationError("invalid credentials")
             else:
