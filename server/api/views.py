@@ -3,7 +3,9 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
+from .permissions import UserPermission
 
 # from rest_framework.authtoken.serializers import AuthTokenSerializer
 from rest_framework.views import APIView
@@ -19,6 +21,8 @@ class UserViewSet(viewsets.ModelViewSet):
     # will return all users including admins
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (UserPermission,)
 
     # overriden create method for login user token management
     def create(self, request, *args, **kwargs):
