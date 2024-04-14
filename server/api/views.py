@@ -68,7 +68,7 @@ def confirm_email_view(request, token_id, user_id):
 
     # compare email_token's user with user_id from param
     if user.pk == user_id:
-        user.is_email_confirmed = True  # confirm email
+        user.is_active = True  # confirm email
         user.save()
         return Response({"message": "email confirmed succesfully"}, status=200)
 

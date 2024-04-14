@@ -6,8 +6,8 @@ from rest_framework import permissions
 class UserPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
-        if view.action == "list":  # require authentication and email confirmation
-            return request.user.is_authenticated and request.user.is_email_confirmed
+        if view.action == "list":  # require authentication and active account
+            return request.user.is_authenticated and request.user.is_active
         elif view.action == "create":
             return True  # anyone can create
         elif view.action in ["retrieve", "update", "partial_update", "destroy"]:

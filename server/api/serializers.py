@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "password", "is_email_confirmed"]
+        fields = ["id", "email", "password", "is_active"]
 
 
 class ObtainAuthTokenSerializer(serializers.ModelSerializer):
@@ -59,4 +59,4 @@ class ObtainAuthTokenSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "email", "password", "is_email_confirmed"]
+        fields = ["id", "email", "password", "is_active"]
