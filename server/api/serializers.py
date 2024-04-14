@@ -50,7 +50,7 @@ class ObtainAuthTokenSerializer(serializers.ModelSerializer):
                     attrs["user"] = user
                     return attrs
                 else:
-                    raise ValidationError("invalid credentials")
+                    raise ValidationError("unable to log in with provided credentials")
             else:
                 raise ValidationError("user not found")
 
