@@ -23,8 +23,9 @@ export default function useLogin() {
       });
 
       // add user to state and local storage
-      localStorage.setItem('token', data.access_token!);
+      localStorage.setItem('user', JSON.stringify(data));
       setUser(data);
+
       setIsLoading(false); // stop loading
     } catch (e) {
       setIsLoading(false);

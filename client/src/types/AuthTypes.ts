@@ -7,7 +7,6 @@ export type User =
   | undefined;
 
 export type AuthState = {
-  isAuthenticated: boolean;
   user: User | undefined;
   accessToken: string | undefined;
 };
@@ -17,14 +16,12 @@ export type UserPayload = {
   access_token: string | undefined;
 };
 
-export type TAuthContext = {
-  isAuthenticated: boolean;
-  user: User | undefined;
+export interface IAuthContext {
+  authState: AuthState;
   // eslint-disable-next-line no-unused-vars
   setUser: (payload: UserPayload) => void;
   removeUser: () => void;
-  accessToken: string | undefined;
-};
+}
 
 export type UserAction = {
   type: string;

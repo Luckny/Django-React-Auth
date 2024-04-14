@@ -1,8 +1,14 @@
-import React, { createContext, useCallback, useReducer, useMemo } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useReducer,
+  useMemo,
+  useEffect,
+} from 'react';
 
 import { logoutAction } from '../../constants';
 import {
-  TAuthContext,
+  IAuthContext,
   AuthState,
   UserAction,
   UserPayload,
@@ -10,13 +16,12 @@ import {
 
 // initial authenticate state of the context
 const initialAuthState: AuthState = {
-  isAuthenticated: false,
   user: undefined,
   accessToken: undefined,
 };
 
 // custom authentification context
-export const AuthContext = createContext<TAuthContext | undefined>(undefined);
+export const AuthContext = createContext<IAuthContext | undefined>(undefined);
 
 // reducer actions
 const actions = {
@@ -39,7 +44,6 @@ export const authReducer = (
     // For register and login
     case actions.LOGIN:
       return {
-        isAuthenticated: true,
         user: action.payload.user,
         accessToken: action.payload.access_token,
       };
@@ -53,11 +57,19 @@ export const authReducer = (
 };
 
 export function AuthContextProvider({ children }: any) {
-  const [state, dispatch] = useReducer(authReducer, initialAuthState);
+  const [authState, dispatch] = useReducer(authReducer, initialAuthState);
 
-  // eslint-disable-next-line no-console
-  console.log('AuthContext state: ', state); // debugging
+  // on first render only
+  useEffect(() => {
+    const userString = localStorage.getItem('user'); // get json user from local storage
+    if (userString) {
+      // since user is defined, we should dispatch the LOGIN action
+      const user = JSON.parse(userString);
+      dispatch({ type: actions.LOGIN, payload: user });
+    }
+  }, []);
 
+  // dispatch action to set the user state
   const setUser = useCallback((payload: UserPayload) => {
     dispatch({
       type: actions.LOGIN,
@@ -65,13 +77,14 @@ export function AuthContextProvider({ children }: any) {
     });
   }, []);
 
+  // dispatch action to remove the user state
   const removeUser = useCallback(() => {
     dispatch(logoutAction);
   }, []);
 
   const authContextProviderValue = useMemo(
-    () => ({ ...state, setUser, removeUser }),
-    [setUser, state, removeUser],
+    () => ({ authState, setUser, removeUser }),
+    [setUser, authState, removeUser],
   );
 
   return (

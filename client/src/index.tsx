@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { ThemeProvider, createTheme } from '@mui/material';
 import './index.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from './pages/Home';
@@ -15,12 +14,6 @@ import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Navbar';
 import Signup from './pages/Signup';
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
 
 const router = createBrowserRouter([
   {
@@ -41,9 +34,7 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <AuthContextProvider>
-      <ThemeProvider theme={darkTheme}>
-        <RouterProvider router={router} />
-      </ThemeProvider>
+      <RouterProvider router={router} />
     </AuthContextProvider>
   </React.StrictMode>,
 );

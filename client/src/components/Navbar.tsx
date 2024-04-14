@@ -7,9 +7,11 @@ import Button from '@mui/material/Button';
 import { Link, Outlet } from 'react-router-dom';
 import { Grid } from '@mui/material';
 import useLogout from '../pages/Login/useLogout';
+import useAuthContext from '../contexts/AuthContext/useAuthContext';
 
 export default function Navbar() {
   const { logout } = useLogout();
+  const { authState } = useAuthContext();
   const handleClick = () => logout();
   return (
     <>
@@ -17,17 +19,29 @@ export default function Navbar() {
         <AppBar position="static">
           <Toolbar>
             <Grid container justifyContent="space-between">
-              <Button component={Link} to="/">
+              <Button color="inherit" component={Link} to="/">
                 <Typography variant="h6" sx={{ flexGrow: 1 }}>
                   Home
                 </Typography>
               </Button>
-              <Button onClick={handleClick} color="inherit">
-                Log out
-              </Button>
-              <Button component={Link} to="/login" color="inherit">
-                Login
-              </Button>
+              <Grid>
+                {authState.user && (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <Typography marginRight={2} variant="caption">
+                      {authState.user.email}
+                    </Typography>
+                    <Button onClick={handleClick} color="inherit">
+                      Log out
+                    </Button>
+                  </div>
+                )}
+
+                {!authState.user && (
+                  <Button component={Link} to="/login" color="inherit">
+                    Login
+                  </Button>
+                )}
+              </Grid>
             </Grid>
           </Toolbar>
         </AppBar>

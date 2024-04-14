@@ -5,7 +5,7 @@ export default function useLogout() {
 
   const logout = () => {
     // remove user from storage
-    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     removeUser();
   };
 

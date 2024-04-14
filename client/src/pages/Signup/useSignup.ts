@@ -22,7 +22,7 @@ export default function useSignup() {
         password,
       });
 
-      localStorage.setItem('token', data.access_token!);
+      localStorage.setItem('user', JSON.stringify(data));
       setUser(data);
 
       setIsLoading(false);
