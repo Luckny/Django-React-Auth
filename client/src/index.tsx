@@ -14,6 +14,7 @@ import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import Navbar from './components/Navbar';
 import Signup from './pages/Signup';
+import Users from './pages/User';
 
 const router = createBrowserRouter([
   {
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
+      { path: '/users', element: <Users /> },
     ],
   },
   { path: '*', element: <NotFound /> },
