@@ -1,18 +1,8 @@
-import React, {
-  createContext,
-  useCallback,
-  useReducer,
-  useMemo,
-  useEffect,
-} from 'react';
+import React, { createContext, useReducer, useMemo, useEffect } from 'react';
 
-import { logoutAction } from '../../constants';
-import {
-  IAuthContext,
-  AuthState,
-  UserAction,
-  UserPayload,
-} from '../../types/AuthTypes';
+import axios from 'axios';
+import { USERS_URL, createUser } from '../../constants';
+import { IAuthContext, AuthState, UserAction } from '../../types/AuthTypes';
 
 // initial authenticate state of the context
 const initialAuthState: AuthState = {
@@ -27,6 +17,7 @@ export const AuthContext = createContext<IAuthContext | undefined>(undefined);
 const actions = {
   LOGIN: 'LOGIN',
   LOGOUT: 'LOGOUT',
+  UPDATE_USER: 'UPDATE_USER',
 };
 
 /**
@@ -44,12 +35,17 @@ export const authReducer = (
     // For register and login
     case actions.LOGIN:
       return {
-        user: action.payload.user,
+        user: createUser(action.payload.user),
         accessToken: action.payload.access_token,
       };
     // For user logout
     case actions.LOGOUT:
       return initialAuthState;
+    case actions.UPDATE_USER:
+      return {
+        user: createUser(action.payload),
+        accessToken: state.accessToken,
+      };
     // Default case if action type doesn't match
     default:
       return state;
@@ -61,30 +57,30 @@ export function AuthContextProvider({ children }: any) {
 
   // on first render only
   useEffect(() => {
-    const userString = localStorage.getItem('user'); // get json user from local storage
-    if (userString) {
-      // since user is defined, we should dispatch the LOGIN action
-      const user = JSON.parse(userString);
-      dispatch({ type: actions.LOGIN, payload: user });
-    }
-  }, []);
+    const initiateState = async () => {
+      const idStr = localStorage.getItem('id'); // get json user from local storage
+      const tokenStr = localStorage.getItem('token');
 
-  // dispatch action to set the user state
-  const setUser = useCallback((payload: UserPayload) => {
-    dispatch({
-      type: actions.LOGIN,
-      payload,
-    });
-  }, []);
-
-  // dispatch action to remove the user state
-  const removeUser = useCallback(() => {
-    dispatch(logoutAction);
+      if (idStr && tokenStr) {
+        const id = JSON.parse(idStr);
+        const token = JSON.parse(tokenStr);
+        // since user is defined, we should dispatch the LOGIN action
+        const { data } = await axios.get(`${USERS_URL}/${id}`, {
+          headers: { Authorization: `Token ${token}` },
+        });
+        // update state
+        dispatch({
+          type: actions.LOGIN,
+          payload: { user: data, access_token: token },
+        });
+      }
+    };
+    initiateState();
   }, []);
 
   const authContextProviderValue = useMemo(
-    () => ({ authState, setUser, removeUser }),
-    [setUser, authState, removeUser],
+    () => ({ authState, dispatch }),
+    [authState, dispatch],
   );
 
   return (

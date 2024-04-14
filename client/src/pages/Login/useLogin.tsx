@@ -7,7 +7,7 @@ import { UserPayload, ValidationError } from '../../types/AuthTypes';
 export default function useLogin() {
   const [errors, setErrors] = useState<ValidationError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useAuthContext();
+  const { dispatch } = useAuthContext();
 
   const login = async (email: string, password: string) => {
     if (!LOGIN_URL) return;
@@ -23,8 +23,9 @@ export default function useLogin() {
       });
 
       // add user to state and local storage
-      localStorage.setItem('user', JSON.stringify(data));
-      setUser(data);
+      localStorage.setItem('token', JSON.stringify(data.access_token));
+      localStorage.setItem('id', JSON.stringify(data.user?.id));
+      dispatch({ type: 'LOGIN', payload: data });
 
       setIsLoading(false); // stop loading
     } catch (e) {

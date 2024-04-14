@@ -7,7 +7,7 @@ import { ValidationError, UserPayload } from '../../types/AuthTypes';
 export default function useSignup() {
   const [errors, setErrors] = useState<ValidationError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
-  const { setUser } = useAuthContext();
+  const { dispatch } = useAuthContext();
 
   const signup = async (email: string, password: string) => {
     // if url is not defined cancel operation
@@ -22,8 +22,9 @@ export default function useSignup() {
         password,
       });
 
-      localStorage.setItem('user', JSON.stringify(data));
-      setUser(data);
+      localStorage.setItem('token', JSON.stringify(data.access_token));
+      localStorage.setItem('id', JSON.stringify(data.user?.id));
+      dispatch({ type: 'LOGIN', payload: data });
 
       setIsLoading(false);
     } catch (e) {

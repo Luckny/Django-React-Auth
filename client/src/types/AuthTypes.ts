@@ -1,3 +1,14 @@
+import { Dispatch } from 'react';
+
+export declare namespace server {
+  export type IUser =
+    | {
+        id: string;
+        email: string;
+        is_email_confirmed: boolean;
+      }
+    | undefined;
+}
 export type User =
   | {
       id: string;
@@ -12,21 +23,18 @@ export type AuthState = {
 };
 
 export type UserPayload = {
-  user: User | undefined;
+  user: server.IUser | undefined;
   access_token: string | undefined;
 };
-
-export interface IAuthContext {
-  authState: AuthState;
-  // eslint-disable-next-line no-unused-vars
-  setUser: (payload: UserPayload) => void;
-  removeUser: () => void;
-}
 
 export type UserAction = {
   type: string;
   payload: UserPayload;
 };
+export interface IAuthContext {
+  authState: AuthState;
+  dispatch: Dispatch<UserAction>;
+}
 
 export type ValidationError =
   | {
