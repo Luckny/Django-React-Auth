@@ -7,7 +7,7 @@ source: https://www.django-rest-framework.org/api-guide/serializers/
 """
 
 from rest_framework import serializers
-from .models import User
+from .models import User, OneTimePassword
 from rest_framework.validators import UniqueValidator
 from rest_framework.exceptions import ValidationError
 
@@ -15,6 +15,7 @@ from rest_framework.exceptions import ValidationError
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     id = serializers.UUIDField(read_only=True)
+    is_active = serializers.BooleanField(read_only=True)
     email = serializers.EmailField(
         validators=[
             UniqueValidator(queryset=User.objects.all(), message="user already exist")
@@ -25,11 +26,21 @@ class UserSerializer(serializers.ModelSerializer):
         user = User.objects.create_user(
             email=validated_data["email"], password=validated_data["password"]
         )
+        user.is_active = False
+        user.save()
         return user
 
     class Meta:
         model = User
         fields = ["id", "email", "password", "is_active"]
+
+
+class OneTimePasswordSerializer(serializers.ModelSerializer):
+    code = serializers.CharField()
+
+    class Meta:
+        model = OneTimePassword
+        fields = ["code"]
 
 
 class ObtainAuthTokenSerializer(serializers.ModelSerializer):

@@ -1,16 +1,18 @@
 from django.forms import ValidationError
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
 from .permissions import UserPermission
-
-# from rest_framework.authtoken.serializers import AuthTokenSerializer
+from django.utils import timezone
 from rest_framework.views import APIView
-from .serializers import UserSerializer, ObtainAuthTokenSerializer
-from .models import User, EmailConfirmationToken
+from .serializers import (
+    UserSerializer,
+    ObtainAuthTokenSerializer,
+    OneTimePasswordSerializer,
+)
+from .models import User, OneTimePassword
 from .utils import send_confirmation_email
 from django.shortcuts import get_object_or_404
 
@@ -42,35 +44,39 @@ class UserViewSet(viewsets.ModelViewSet):
         # save the user
         user = serializer.save()
 
-        # create the email confirmation token
-        email_token = EmailConfirmationToken.objects.create(user=user)
+        # create the one time password for the user
+        otp = OneTimePassword.objects.create(user=user)
 
         try:
             # send email for confirmation
-            send_confirmation_email(user.email, email_token.pk, user.pk)
-        except Exception as e:  # pragma no cover
-            # If sending email fails, delete the user and email_token
+            send_confirmation_email(user.email, otp.code, user.pk)
+        except Exception:  # pragma no cover
+            # If sending email fails, delete the user and otp
             user.delete()
-            email_token.delete()
-
-            print("Failed to send confirmation email:", e)  # debugging
+            otp.delete()
 
             raise ValidationError("Failed to send confirmation email.")
 
 
-# end point for confirming a user's email address
-@api_view(["POST"])
-def confirm_email_view(request, token_id, user_id):
-    email_token = get_object_or_404(EmailConfirmationToken, pk=token_id)
+class ConfirmEmailAPIView(APIView):
+    def post(self, request):
+        otp_serializer = OneTimePasswordSerializer(data=request.data)
+        if otp_serializer.is_valid():
+            code = otp_serializer.data["code"]
 
-    # get user from email_toek
-    user = email_token.user
+            otp = get_object_or_404(OneTimePassword, code=code)
 
-    # compare email_token's user with user_id from param
-    if user.pk == user_id:
-        user.is_active = True  # confirm email
-        user.save()
-        return Response({"message": "email confirmed succesfully"}, status=200)
+            # get user from onetimepassword
+            user = otp.user
+
+            # if otp not expired yet
+            if otp.expires_at > timezone.now():
+                user.is_active = True  # activate user account
+                user.save()
+                return Response({"message": "email confirmed succesfully"}, status=200)
+            else:
+                return Response({"message": "one time password expired"}, status=403)
+        return Response({"message": otp_serializer.errors})
 
 
 # custum class for login and token
