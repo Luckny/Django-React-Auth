@@ -155,8 +155,10 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
-
+REST_FRAMEWORK = {
+    # other settings
+    "EXCEPTION_HANDLER": "api.utils.custom_exception_handler"
+}
 # email configurations
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
