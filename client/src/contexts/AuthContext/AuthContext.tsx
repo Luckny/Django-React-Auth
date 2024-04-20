@@ -1,8 +1,13 @@
 import React, { createContext, useReducer, useMemo, useEffect } from 'react';
 
-import axios from 'axios';
+import axios, { isAxiosError } from 'axios';
 import { USERS_URL, createUser } from '../../utils';
-import { IAuthContext, AuthState, UserAction } from '../../types/AuthTypes';
+import {
+  IAuthContext,
+  AuthState,
+  UserAction,
+  UserError,
+} from '../../types/AuthTypes';
 
 // initial authenticate state of the context
 const initialAuthState: AuthState = {
@@ -64,16 +69,25 @@ export function AuthContextProvider({ children }: any) {
       if (idStr && tokenStr) {
         const id = JSON.parse(idStr);
         const token = JSON.parse(tokenStr);
-        // since user is defined, we should dispatch the LOGIN action
-        const { data } = await axios.get(`${USERS_URL}/${id}`, {
-          headers: { Authorization: `Token ${token}` },
-        });
-        // update state
-        dispatch({
-          type: actions.LOGIN,
-          payload: { user: data, access_token: token },
-        });
+        try {
+          // since user is defined, we should dispatch the LOGIN action
+          const { data } = await axios.get(`${USERS_URL}/${id}`, {
+            headers: { Authorization: `Token ${token}` },
+          });
+          // update state
+          dispatch({
+            type: actions.LOGIN,
+            payload: { user: data, access_token: token },
+          });
+        } catch (e) {
+          if (isAxiosError<UserError>(e)) {
+            // eslint-disable-next-line no-console
+            console.error(e);
+          }
+        }
       }
+
+      // if invalid token go to login
     };
     initiateState();
   }, []);

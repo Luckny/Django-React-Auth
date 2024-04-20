@@ -42,3 +42,9 @@ export type ValidationError =
       non_field_errors?: string[];
     }
   | undefined;
+
+export type UserError =
+  | {
+      token: string;
+    }
+  | undefined;
