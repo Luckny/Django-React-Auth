@@ -9,7 +9,7 @@ import {
   ListItemText,
 } from '@mui/material';
 import axios from 'axios';
-import { USERS_URL } from '../../constants';
+import { USERS_URL } from '../../utils';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 import { server } from '../../types/AuthTypes';
 
@@ -19,11 +19,16 @@ export default function UsersList() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const response = await axios.get(USERS_URL, {
-        headers: { Authorization: `Token ${authState.accessToken}` },
-      });
+      try {
+        const response = await axios.get(USERS_URL, {
+          headers: { Authorization: `Token ${authState.accessToken}` },
+        });
 
-      setUsers(response.data);
+        setUsers(response.data);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(e);
+      }
     };
     fetchUsers();
   }, [authState.accessToken]);

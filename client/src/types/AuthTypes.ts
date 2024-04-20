@@ -5,7 +5,7 @@ export declare namespace server {
     | {
         id: string;
         email: string;
-        is_email_confirmed: boolean;
+        is_active: boolean;
       }
     | undefined;
 }
@@ -13,7 +13,7 @@ export type User =
   | {
       id: string;
       email: string;
-      isEmailVerified: boolean;
+      isActive: boolean;
     }
   | undefined;
 

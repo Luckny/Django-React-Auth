@@ -1,11 +1,10 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import { Link, Outlet } from 'react-router-dom';
-import { Grid } from '@mui/material';
+import { Container, Grid } from '@mui/material';
 import useLogout from '../pages/Login/useLogout';
 import useAuthContext from '../contexts/AuthContext/useAuthContext';
 
@@ -15,7 +14,7 @@ export default function Navbar() {
   const handleClick = () => logout();
   return (
     <>
-      <Box sx={{ flexGrow: 1 }}>
+      <Container maxWidth={false} disableGutters>
         <AppBar position="static">
           <Toolbar>
             <Grid container justifyContent="space-between">
@@ -45,7 +44,7 @@ export default function Navbar() {
             </Grid>
           </Toolbar>
         </AppBar>
-      </Box>
+      </Container>
       <Outlet />
     </>
   );

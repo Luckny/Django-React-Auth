@@ -1,7 +1,7 @@
 import React, { createContext, useReducer, useMemo, useEffect } from 'react';
 
 import axios from 'axios';
-import { USERS_URL, createUser } from '../../constants';
+import { USERS_URL, createUser } from '../../utils';
 import { IAuthContext, AuthState, UserAction } from '../../types/AuthTypes';
 
 // initial authenticate state of the context
