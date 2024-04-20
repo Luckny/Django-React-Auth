@@ -29,7 +29,7 @@ def send_confirmation_email(email_address, code, user_id):
 def custom_exception_handler(exc, context):
     if isinstance(exc, AuthenticationFailed):
         print(exc)
-        return Response({"user": str(exc)}, status=401)
+        return Response({"user_activation": str(exc)}, status=401)
 
     # else
     # default case

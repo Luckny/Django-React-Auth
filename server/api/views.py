@@ -2,9 +2,9 @@ from django.forms import ValidationError
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import AllowAny
 from .permissions import UserPermission
+from .authentication import CustomTokenAuth
 from django.utils import timezone
 from rest_framework.views import APIView
 from .serializers import (
@@ -23,7 +23,7 @@ class UserViewSet(viewsets.ModelViewSet):
     # will return all users including admins
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = (TokenAuthentication,)
+    authentication_classes = (CustomTokenAuth,)
     permission_classes = (UserPermission,)
 
     # overriden create method for login user token management
