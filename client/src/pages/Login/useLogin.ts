@@ -1,32 +1,33 @@
 import { useState } from 'react';
 import axios, { isAxiosError } from 'axios';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
-import { SIGNUP_URL } from '../../utils';
-import { ValidationError, UserPayload } from '../../types/AuthTypes';
+import { LOGIN_URL } from '../../utils';
+import { UserPayload, ValidationError } from '../../types/AuthTypes';
 
-export default function useSignup() {
+export default function useLogin() {
   const [errors, setErrors] = useState<ValidationError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
-  const signup = async (email: string, password: string) => {
-    // if url is not defined cancel operation
-    if (!SIGNUP_URL) return;
-    // Start loading on function call
-    setIsLoading(true);
-    // reset error
-    setErrors({ email: [] });
+  const login = async (email: string, password: string) => {
+    if (!LOGIN_URL) return;
+
+    setIsLoading(true); // Start loading on function call
+
+    setErrors(undefined); // reset error
+
     try {
-      const { data } = await axios.post<UserPayload>(SIGNUP_URL, {
+      const { data } = await axios.post<UserPayload>(LOGIN_URL, {
         email,
         password,
       });
 
+      // add user to state and local storage
       localStorage.setItem('token', JSON.stringify(data.access_token));
       localStorage.setItem('id', JSON.stringify(data.user?.id));
       dispatch({ type: 'LOGIN', payload: data });
 
-      setIsLoading(false);
+      setIsLoading(false); // stop loading
     } catch (e) {
       setIsLoading(false);
       if (isAxiosError<ValidationError>(e)) setErrors(e.response?.data);
@@ -35,5 +36,5 @@ export default function useSignup() {
     }
   };
 
-  return { signup, isLoading, errors };
+  return { login, isLoading, errors };
 }

@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { logoutAction } from '../../constants';
+import { logoutAction } from '../../utils';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 
 export default function useLogout() {

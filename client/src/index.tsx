@@ -12,20 +12,23 @@ import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
-import Navbar from './components/Navbar';
 import Signup from './pages/Signup';
 import Users from './pages/User';
+import { ProtectedRoutes } from './utils';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Navbar />,
+    element: <Home />,
     children: [
-      { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
-      { path: '/users', element: <Users /> },
     ],
+  },
+  {
+    path: '/',
+    element: <ProtectedRoutes />,
+    children: [{ path: '/users', element: <Users /> }],
   },
   { path: '*', element: <NotFound /> },
 ]);
