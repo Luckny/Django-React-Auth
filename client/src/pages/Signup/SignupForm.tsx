@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { useNavigate } from 'react-router-dom';
 import useSignup from './useSignup';
 import ApiError from '../../components/ApiError';
 
@@ -17,11 +18,13 @@ export default function Signup() {
 
   const [password, setPassword] = useState('');
   const { signup, isLoading, errors } = useSignup();
+  const navigate = useNavigate();
 
   // Function to handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await signup(email, password);
+    navigate('/');
   };
 
   return (
