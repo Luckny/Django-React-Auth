@@ -1,8 +1,7 @@
 import React from 'react';
-import { Outlet } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 import { User, UserAction } from './types/AuthTypes';
 import useAuthContext from './contexts/AuthContext/useAuthContext';
-import Home from './pages/Home';
 
 export const logoutAction: UserAction = {
   type: 'LOGOUT',
@@ -21,5 +20,5 @@ export const USERS_URL = `${process.env.REACT_APP_API_URL}/users`;
 
 export function ProtectedRoutes() {
   const { authState } = useAuthContext();
-  return authState.user?.isActive ? <Outlet /> : <Home />;
+  return authState.user?.isActive ? <Outlet /> : <Navigate to="/" />;
 }

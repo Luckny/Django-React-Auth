@@ -15,12 +15,14 @@ import NotFound from './pages/NotFound';
 import Signup from './pages/Signup';
 import Users from './pages/User';
 import { ProtectedRoutes } from './utils';
+import Navbar from './components/Navbar';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: <Navbar />,
     children: [
+      { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
     ],
