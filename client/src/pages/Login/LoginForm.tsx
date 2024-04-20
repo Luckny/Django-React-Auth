@@ -9,24 +9,26 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import useLogin from './useLogin';
 import ApiError from '../../components/ApiError';
+import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 
-export default function Signup() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, isLoading, errors } = useLogin();
-  const navigate = useNavigate();
+  const { authState } = useAuthContext();
 
   // Function to handle form submission
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     await login(email, password);
-    navigate('/');
   };
 
-  return (
+  return authState.user && !isLoading ? (
+    <Navigate to="/" />
+  ) : (
     <Grid
       container
       direction="column"
@@ -84,11 +86,11 @@ export default function Signup() {
             </Button>
             {errors && <ApiError errors={errors} />}
             <Grid container>
-              <Grid item xs>
+              {/* <Grid item xs>
                 <Link to="/">Forgot password?</Link>
-              </Grid>
+              </Grid> */}
               <Grid item>
-                <Link to="/">Dont have an account? Sign Up</Link>
+                <Link to="/signup">Dont have an account? Sign Up</Link>
               </Grid>
             </Grid>
           </Box>
