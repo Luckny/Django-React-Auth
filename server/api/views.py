@@ -68,15 +68,14 @@ class ConfirmEmailAPIView(APIView):
 
             # get user from onetimepassword
             user = otp.user
-
             # if otp not expired yet
-            if otp.expires_at > timezone.now():
+            if otp.expires_at > timezone.localtime(timezone.now()):
                 user.is_active = True  # activate user account
                 user.save()
                 return Response({"message": "email confirmed succesfully"}, status=200)
             else:
-                return Response({"message": "one time password expired"}, status=403)
-        return Response({"message": otp_serializer.errors})
+                raise ValueError("one time password expired")
+        return Response({"message": otp_serializer.errors}, status=500)
 
 
 # custum class for login and token

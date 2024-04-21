@@ -57,5 +57,8 @@ class OneTimePassword(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # OTP expires after 5 minutes of creation
     expires_at = models.DateTimeField(
-        default=timezone.now() + timezone.timedelta(minutes=5)
+        default=timezone.localtime(timezone.now() + timezone.timedelta(minutes=5))
     )
+
+    def __str__(self) -> str:
+        return f"{self.code}"
