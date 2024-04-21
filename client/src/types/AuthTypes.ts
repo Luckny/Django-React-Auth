@@ -20,6 +20,7 @@ export type User =
 export type AuthState = {
   user: User | undefined;
   accessToken: string | undefined;
+  isAuthenticated: boolean;
 };
 
 export type UserPayload = {
@@ -46,5 +47,7 @@ export type ValidationError =
 export type UserError =
   | {
       token: string;
+      wrongOTP: string;
+      expiredOTP: string;
     }
   | undefined;

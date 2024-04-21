@@ -1,4 +1,10 @@
-import React, { createContext, useReducer, useMemo, useEffect } from 'react';
+import React, {
+  createContext,
+  useReducer,
+  useMemo,
+  useEffect,
+  useState,
+} from 'react';
 
 import axios, { isAxiosError } from 'axios';
 import { USERS_URL, createUser } from '../../utils';
@@ -13,6 +19,7 @@ import {
 const initialAuthState: AuthState = {
   user: undefined,
   accessToken: undefined,
+  isAuthenticated: false,
 };
 
 // custom authentification context
@@ -42,6 +49,7 @@ export const authReducer = (
       return {
         user: createUser(action.payload.user),
         accessToken: action.payload.access_token,
+        isAuthenticated: true,
       };
     // For user logout
     case actions.LOGOUT:
@@ -50,6 +58,7 @@ export const authReducer = (
       return {
         user: createUser(action.payload),
         accessToken: state.accessToken,
+        isAuthenticated: true,
       };
     // Default case if action type doesn't match
     default:
@@ -59,6 +68,7 @@ export const authReducer = (
 
 export function AuthContextProvider({ children }: any) {
   const [authState, dispatch] = useReducer(authReducer, initialAuthState);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   // on first render only
   useEffect(() => {
@@ -87,7 +97,7 @@ export function AuthContextProvider({ children }: any) {
         }
       }
 
-      // if invalid token go to login
+      setIsLoading(false);
     };
     initiateState();
   }, []);
@@ -96,6 +106,11 @@ export function AuthContextProvider({ children }: any) {
     () => ({ authState, dispatch }),
     [authState, dispatch],
   );
+
+  // Only render children when authentication state is available and not loading
+  if (!authState.isAuthenticated && isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <AuthContext.Provider value={authContextProviderValue}>

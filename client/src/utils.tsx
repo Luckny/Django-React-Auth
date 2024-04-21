@@ -17,8 +17,10 @@ export const createUser = (user: any): User => ({
 export const SIGNUP_URL = `${process.env.REACT_APP_API_URL}/users/`;
 export const LOGIN_URL = `${process.env.REACT_APP_API_URL}/login/`;
 export const USERS_URL = `${process.env.REACT_APP_API_URL}/users`;
+export const CONFIRM_EMAIL_URL = `${process.env.REACT_APP_API_URL}/confirm_email/`;
 
 export function ProtectedRoutes() {
   const { authState } = useAuthContext();
+
   return authState.user?.isActive ? <Outlet /> : <Navigate to="/" />;
 }

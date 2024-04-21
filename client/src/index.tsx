@@ -25,13 +25,14 @@ const router = createBrowserRouter([
       { path: '/', element: <Home /> },
       { path: '/login', element: <Login /> },
       { path: '/signup', element: <Signup /> },
+      {
+        path: '/',
+        element: <ProtectedRoutes />,
+        children: [{ path: 'users/', element: <Users /> }],
+      },
     ],
   },
-  {
-    path: '/',
-    element: <ProtectedRoutes />,
-    children: [{ path: '/users', element: <Users /> }],
-  },
+
   { path: '*', element: <NotFound /> },
 ]);
 
@@ -39,9 +40,9 @@ const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement,
 );
 root.render(
-  <React.StrictMode>
-    <AuthContextProvider>
-      <RouterProvider router={router} />
-    </AuthContextProvider>
-  </React.StrictMode>,
+  // <React.StrictMode>
+  <AuthContextProvider>
+    <RouterProvider router={router} />
+  </AuthContextProvider>,
+  // </React.StrictMode>,
 );

@@ -1,5 +1,6 @@
 import { Send } from '@mui/icons-material';
 import {
+  Alert,
   Divider,
   Grid,
   IconButton,
@@ -8,11 +9,25 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
-import React from 'react';
+import axios, { isAxiosError } from 'axios';
+import React, { useState } from 'react';
+import { CONFIRM_EMAIL_URL } from '../utils';
+import { UserError } from '../types/AuthTypes';
 
 export default function ActivateAcount() {
-  const handleSubmit = () => {
-    console.log('handing submit');
+  const [otp, setOtp] = useState<string>('');
+  const [otpError, setOtpError] = useState<string>('');
+  const handleSubmit = async () => {
+    try {
+      setOtpError('');
+      await axios.post(CONFIRM_EMAIL_URL, { code: otp });
+    } catch (e) {
+      if (isAxiosError<UserError>(e)) {
+        const { data } = e.response!;
+        if (data?.wrongOTP) setOtpError(data.wrongOTP);
+        if (data?.expiredOTP) setOtpError(data.expiredOTP);
+      }
+    }
   };
   return (
     <Grid
@@ -23,6 +38,11 @@ export default function ActivateAcount() {
       sx={{ minHeight: '80vh' }}
       maxWidth="xs"
     >
+      {otpError && (
+        <Alert sx={{ margin: 2 }} severity="error">
+          {otpError}
+        </Alert>
+      )}
       <Paper elevation={10} sx={{ padding: 3, display: 'flex' }}>
         <Grid
           sx={{
@@ -43,6 +63,7 @@ export default function ActivateAcount() {
             size="small"
             variant="standard"
             sx={{ width: 100 }}
+            onChange={(e) => setOtp(e.target.value)}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
