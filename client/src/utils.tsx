@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
+import axios from 'axios';
 import { User, UserAction } from './types/AuthTypes';
 import useAuthContext from './contexts/AuthContext/useAuthContext';
 
@@ -24,3 +25,12 @@ export function ProtectedRoutes() {
 
   return authState.user?.isActive ? <Outlet /> : <Navigate to="/" />;
 }
+
+export const getUserFromDB = async (id: string, token: string) => {
+  // since user is defined, we should dispatch the LOGIN action
+  const response = await axios.get(`${USERS_URL}/${id}`, {
+    headers: { Authorization: `Token ${token}` },
+  });
+
+  return response.data;
+};

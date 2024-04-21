@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Send } from '@mui/icons-material';
 import {
   Alert,
@@ -10,17 +11,27 @@ import {
   Typography,
 } from '@mui/material';
 import axios, { isAxiosError } from 'axios';
-import React, { useState } from 'react';
-import { CONFIRM_EMAIL_URL } from '../utils';
+import { CONFIRM_EMAIL_URL, getUserFromDB } from '../utils';
 import { UserError } from '../types/AuthTypes';
+import useAuthContext from '../contexts/AuthContext/useAuthContext';
 
 export default function ActivateAcount() {
   const [otp, setOtp] = useState<string>('');
   const [otpError, setOtpError] = useState<string>('');
+  const { authState, dispatch } = useAuthContext();
+
   const handleSubmit = async () => {
     try {
-      setOtpError('');
-      await axios.post(CONFIRM_EMAIL_URL, { code: otp });
+      setOtpError(''); // reset error
+      const response = await axios.post(CONFIRM_EMAIL_URL, { code: otp });
+      if (response.status === 200) {
+        // if successfull refresh the user
+        const user = await getUserFromDB(
+          authState.user?.id!,
+          authState.accessToken!,
+        );
+        dispatch({ type: 'UPDATE_USER', payload: user });
+      }
     } catch (e) {
       if (isAxiosError<UserError>(e)) {
         const { data } = e.response!;

@@ -96,7 +96,6 @@ export function AuthContextProvider({ children }: any) {
           }
         }
       }
-
       setIsLoading(false);
     };
     initiateState();
