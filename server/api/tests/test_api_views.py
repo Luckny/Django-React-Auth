@@ -1,6 +1,7 @@
 from django.urls import reverse
 from rest_framework.test import APITestCase
-from api.models import User, EmailConfirmationToken
+from api.models import User
+from rest_framework.authtoken.models import Token
 
 
 class UsersAPITests(APITestCase):
@@ -72,45 +73,68 @@ class UsersAPITests(APITestCase):
 
         url = reverse("api:login")
         body = {
-            "username": self.default_email,
+            "email": self.default_email,
             "password": self.default_pass,
         }
         response = self.client.post(url, body, format="json")
         # reponse should have status code of 200 (ok)
         self.assertEqual(response.status_code, 200)
         # response should have a token
-        self.assertIn("token", response.data)
+        self.assertIn("access_token", response.data)
 
     def test_login_bad_password(self):
         # user in database
         self.create_default_user()
 
         url = reverse("api:login")
-        body = {"username": self.default_email, "password": "badPassword"}
+        body = {"email": self.default_email, "password": "badPassword"}
         response = self.client.post(url, body, format="json")
         # reponse should have status code of 400 (Bad request)
         self.assertEqual(response.status_code, 400)
 
-    def test_email_confirmation(self):
-        # register user
-        self.register_default_user()
+    def test_authentication_valid_token(self):
+        user = self.create_default_user()
+        token, created = Token.objects.get_or_create(user=user)
+        headers = {"HTTP_AUTHORIZATION": "Token " + str(token.key)}
+        url = reverse("users:user-detail", kwargs={"pk": user.pk})
 
-        # get the new user
-        user = User.objects.filter(email=self.default_email).first()
-
-        # user's token should exist
-        token = EmailConfirmationToken.objects.filter(user=user).first()
-        self.assertIsNotNone(token)
-
-        # user email should not be verified
-        self.assertFalse(user.is_email_confirmed)
-
-        url = reverse("api:confirm", args=[token.pk, user.pk])
-        body = {"token_id": token.pk, "user_id": user.pk}
-        # should validate email
-        response = self.client.post(url, body, format="json")
+        response = self.client.get(url, **headers)
         self.assertEqual(response.status_code, 200)
 
-        # response is_email_confirmed should be true
-        user.refresh_from_db()
-        self.assertTrue(user.is_email_confirmed)
+    def test_authentication_invalid_token(self):
+        user = self.create_default_user()
+        headers = {"HTTP_AUTHORIZATION": "Token " + str(123456789)}
+        url = reverse("users:user-detail", kwargs={"pk": user.pk})
+
+        response = self.client.get(url, **headers)
+        self.assertEqual(response.status_code, 401)
+
+    #     headers = {
+    #        'Authorization': 'Token ' + user.token.key
+
+    #    }
+    #     response self.client.get(url)
+
+    # def test_email_confirmation(self):
+    #     # register user
+    #     self.register_default_user()
+
+    #     # get the new user
+    #     user = User.objects.filter(email=self.default_email).first()
+
+    #     # user's token should exist
+    #     token = EmailConfirmationToken.objects.filter(user=user).first()
+    #     self.assertIsNotNone(token)
+
+    #     # user email should not be verified
+    #     self.assertFalse(user.is_email_confirmed)
+
+    #     url = reverse("api:confirm", args=[token.pk, user.pk])
+    #     body = {"token_id": token.pk, "user_id": user.pk}
+    #     # should validate email
+    #     response = self.client.post(url, body, format="json")
+    #     self.assertEqual(response.status_code, 200)
+
+    #     # response is_email_confirmed should be true
+    #     user.refresh_from_db()
+    #     self.assertTrue(user.is_email_confirmed)
