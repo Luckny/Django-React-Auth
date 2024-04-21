@@ -7,6 +7,7 @@ from django.contrib.auth.models import (
 from django.utils import timezone
 from uuid import uuid4
 import secrets
+import datetime
 
 
 class UserManager(BaseUserManager):
@@ -48,6 +49,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
 
+def five_minutes():
+    return timezone.localtime(timezone.now() + datetime.timedelta(minutes=5))
+
+
 class OneTimePassword(models.Model):
     # random unique field of 6 characters
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
@@ -56,9 +61,7 @@ class OneTimePassword(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     # OTP expires after 5 minutes of creation
-    expires_at = models.DateTimeField(
-        default=timezone.localtime(timezone.now() + timezone.timedelta(minutes=5))
-    )
+    expires_at = models.DateTimeField(default=five_minutes)
 
     def __str__(self) -> str:
         return f"{self.code}"
