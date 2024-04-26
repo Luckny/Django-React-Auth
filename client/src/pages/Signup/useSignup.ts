@@ -2,10 +2,10 @@ import { useState } from 'react';
 import axios, { isAxiosError } from 'axios';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 import { SIGNUP_URL } from '../../utils';
-import { ValidationError, UserPayload } from '../../types/AuthTypes';
+import { UserError, UserPayload } from '../../types/AuthTypes';
 
 export default function useSignup() {
-  const [errors, setErrors] = useState<ValidationError>(undefined);
+  const [errors, setErrors] = useState<UserError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
@@ -15,7 +15,7 @@ export default function useSignup() {
     // Start loading on function call
     setIsLoading(true);
     // reset error
-    setErrors({ email: [] });
+    setErrors(undefined);
     try {
       const { data } = await axios.post<UserPayload>(SIGNUP_URL, {
         email,
@@ -29,7 +29,7 @@ export default function useSignup() {
       setIsLoading(false);
     } catch (e) {
       setIsLoading(false);
-      if (isAxiosError<ValidationError>(e)) setErrors(e.response?.data);
+      if (isAxiosError<UserError>(e)) setErrors(e.response?.data);
       // eslint-disable-next-line no-console
       else console.error(e);
     }

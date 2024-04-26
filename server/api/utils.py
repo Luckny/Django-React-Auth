@@ -2,7 +2,6 @@ import os
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.views import exception_handler
 from rest_framework.response import Response
 
 
@@ -37,4 +36,4 @@ def custom_exception_handler(exc, context):
 
     # else
     # default case
-    return Response({"error": str(exc)}, status=500)
+    return Response({"message": str(exc)}, status=500)

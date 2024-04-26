@@ -49,5 +49,6 @@ export type UserError =
       token: string;
       wrongOTP: string;
       expiredOTP: string;
+      message: string;
     }
   | undefined;

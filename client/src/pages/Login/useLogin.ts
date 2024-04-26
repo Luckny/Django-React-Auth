@@ -2,10 +2,10 @@ import { useState } from 'react';
 import axios, { isAxiosError } from 'axios';
 import useAuthContext from '../../contexts/AuthContext/useAuthContext';
 import { LOGIN_URL } from '../../utils';
-import { UserPayload, ValidationError } from '../../types/AuthTypes';
+import { UserError, UserPayload } from '../../types/AuthTypes';
 
 export default function useLogin() {
-  const [errors, setErrors] = useState<ValidationError>(undefined);
+  const [errors, setErrors] = useState<UserError>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const { dispatch } = useAuthContext();
 
@@ -30,7 +30,7 @@ export default function useLogin() {
       setIsLoading(false); // stop loading
     } catch (e) {
       setIsLoading(false);
-      if (isAxiosError<ValidationError>(e)) setErrors(e.response?.data);
+      if (isAxiosError<UserError>(e)) setErrors(e.response?.data);
       // eslint-disable-next-line no-console
       else console.error(e);
     }
