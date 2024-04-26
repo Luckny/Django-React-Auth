@@ -37,4 +37,4 @@ def custom_exception_handler(exc, context):
 
     # else
     # default case
-    return exception_handler(exc, context)
+    return Response({"error": str(exc)}, status=500)
