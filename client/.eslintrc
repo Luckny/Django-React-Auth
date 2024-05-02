@@ -1,0 +1,39 @@
+{
+    "extends": [
+        "react-app",
+        "react-app/jest",
+        "airbnb",
+        "prettier"
+    ],
+    "rules": {
+        "react/jsx-filename-extension": [
+            1,
+            {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".tsx"
+                ]
+            }
+        ],
+        "import/extensions": [
+            0,
+            {
+                "tsx": "never"
+            }
+        ],
+        "object-curly-newline": "off"
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            }
+        }
+    }
+}

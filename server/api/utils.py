@@ -1,24 +1,18 @@
 import os
 from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.response import Response
 
 
-def send_confirmation_email(email_address, token_id, user_id):
-    # Prepare data for the email template
-    data = {
-        "base_url": os.getenv(
-            "EMAIL_CONFIRM_POST_URL"
-        ),  # Base URL for confirmation link
-        "token_id": str(token_id),  # Convert token ID to string
-        "user_id": str(user_id),  # Convert user ID to string
-    }
+def send_confirmation_email(email_address, code, user_id):
 
     # Render HTML email template
-    html_message = render_to_string("api/confirm_email.html", data)
+    html_message = render_to_string("api/confirm_email.html", {"code": code})
 
     # Create email message
     mail = EmailMessage(
-        "Confirm Your Email Address",  # Subject of the email
+        "Here's your verification code",  # Subject of the email
         html_message,  # HTML content of the email
         os.environ.get("EMAIL_HOST_USER"),  # Sender's email address
         [email_address],  # Recipient's email address
@@ -29,3 +23,17 @@ def send_confirmation_email(email_address, token_id, user_id):
 
     # Send the email
     mail.send(fail_silently=False)
+
+
+def custom_exception_handler(exc, context):
+    if isinstance(exc, AuthenticationFailed):
+        print(exc)
+        return Response({"token": str(exc)}, status=401)
+    elif str(exc) == "No OneTimePassword matches the given query.":
+        return Response({"wrongOTP": str(exc)}, status=404)
+    elif str(exc) == "one time password expired":
+        return Response({"expiredOTP": str(exc)}, status=403)
+
+    # else
+    # default case
+    return Response({"message": str(exc)}, status=500)

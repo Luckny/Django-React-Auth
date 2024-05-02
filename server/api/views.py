@@ -1,9 +1,18 @@
 from django.forms import ValidationError
-from rest_framework import viewsets
-from rest_framework.decorators import api_view
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .serializers import UserSerializer
-from .models import User, EmailConfirmationToken
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
+from .permissions import UserPermission
+from .authentication import CustomTokenAuth
+from django.utils import timezone
+from rest_framework.views import APIView
+from .serializers import (
+    UserSerializer,
+    ObtainAuthTokenSerializer,
+    OneTimePasswordSerializer,
+)
+from .models import User, OneTimePassword
 from .utils import send_confirmation_email
 from django.shortcuts import get_object_or_404
 
@@ -14,37 +23,75 @@ class UserViewSet(viewsets.ModelViewSet):
     # will return all users including admins
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    authentication_classes = (CustomTokenAuth,)
+    permission_classes = (UserPermission,)
 
-    # overing saving method
+    # overriden create method for login user token management
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        access_token, created = Token.objects.get_or_create(user=serializer.instance)
+        return Response(
+            data={"user": serializer.data, "access_token": access_token.key},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
+        )
+
+    # overriding saving method
     def perform_create(self, serializer):
         # save the user
         user = serializer.save()
 
-        # create the email confirmation token
-        token = EmailConfirmationToken.objects.create(user=user)
+        # create the one time password for the user
+        otp = OneTimePassword.objects.create(user=user)
 
         try:
             # send email for confirmation
-            send_confirmation_email(user.email, token.pk, user.pk)
-        except Exception as e:  # pragma no cover
-            # If sending email fails, delete the user and token
+            send_confirmation_email(user.email, otp.code, user.pk)
+        except Exception:  # pragma no cover
+            # If sending email fails, delete the user and otp
             user.delete()
-            token.delete()
-
-            print("Failed to send confirmation email:", e)  # debugging
+            otp.delete()
 
             raise ValidationError("Failed to send confirmation email.")
 
 
-@api_view(["POST"])
-def confirm_email_view(request, token_id, user_id):
-    token = get_object_or_404(EmailConfirmationToken, pk=token_id)
+class ConfirmEmailAPIView(APIView):
+    def post(self, request):
+        otp_serializer = OneTimePasswordSerializer(data=request.data)
+        if otp_serializer.is_valid():
+            code = otp_serializer.data["code"]
 
-    # get user from token
-    user = token.user
+            otp = get_object_or_404(OneTimePassword, code=code)
 
-    # compare token's user with user_id from param
-    if user.pk == user_id:
-        user.is_email_confirmed = True  # confirm email
-        user.save()
-        return Response({"message": "email confirmed succesfully"}, status=200)
+            # get user from onetimepassword
+            user = otp.user
+            # if otp not expired yet
+            if timezone.localtime(otp.expires_at) >= timezone.localtime(timezone.now()):
+                user.is_active = True  # activate user account
+                user.save()
+                return Response({"message": "email confirmed succesfully"}, status=200)
+            else:
+                raise ValueError("one time password expired")
+        return Response({"message": otp_serializer.errors}, status=500)
+
+
+# custum class for login and token
+class ObtainAuthToken(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = ObtainAuthTokenSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        token, created = Token.objects.get_or_create(user=user)
+        return Response(
+            data={
+                "user": ObtainAuthTokenSerializer(user).data,
+                "access_token": token.key,
+            },
+            status=status.HTTP_200_OK,
+        )

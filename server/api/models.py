@@ -4,8 +4,10 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     BaseUserManager,
 )
-
+from django.utils import timezone
 from uuid import uuid4
+import secrets
+import datetime
 
 
 class UserManager(BaseUserManager):
@@ -40,15 +42,26 @@ class User(AbstractBaseUser, PermissionsMixin):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     email = models.EmailField(unique=True)
     is_staff = models.BooleanField(default=False)
-    is_email_confirmed = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     USERNAME_FIELD = "email"
 
     objects = UserManager()
 
 
-class EmailConfirmationToken(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+def five_minutes():
+    return timezone.localtime(timezone.now() + datetime.timedelta(minutes=5))
 
-    # one user has one confirmation token
+
+class OneTimePassword(models.Model):
+    # random unique field of 6 characters
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    code = models.CharField(max_length=6, default=secrets.token_hex(3).upper())
+    # related user
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    # OTP expires after 5 minutes of creation
+    expires_at = models.DateTimeField(default=five_minutes)
+
+    def __str__(self) -> str:
+        return f"{self.code}"
