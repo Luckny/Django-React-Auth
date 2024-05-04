@@ -15,8 +15,8 @@ class UserManager(BaseUserManager):
     # A user is created with an email and a password
     # **extras: fields like first_name, last_name ...
     def create_user(self, email, password, **extras):
-        if not email:
-            raise ValueError("Users must have an email address")
+        if not email or not password:
+            raise ValueError("missing required field.")
 
         user = self.model(
             email=self.normalize_email(email), **extras
