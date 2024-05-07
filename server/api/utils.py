@@ -3,9 +3,10 @@ from django.core.mail import EmailMessage
 from django.template.loader import render_to_string
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
+from rest_framework.views import exception_handler
 
 
-def send_confirmation_email(email_address, code, user_id):
+def send_confirmation_email(email_address, code):
 
     # Render HTML email template
     html_message = render_to_string("api/confirm_email.html", {"code": code})
@@ -26,14 +27,16 @@ def send_confirmation_email(email_address, code, user_id):
 
 
 def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
     if isinstance(exc, AuthenticationFailed):
-        print(exc)
         return Response({"token": str(exc)}, status=401)
     elif str(exc) == "No OneTimePassword matches the given query.":
         return Response({"wrongOTP": str(exc)}, status=404)
     elif str(exc) == "one time password expired":
         return Response({"expiredOTP": str(exc)}, status=403)
 
-    # else
+    code = None
+    if response is not None:
+        code = response.status_code
     # default case
-    return Response({"message": str(exc)}, status=500)
+    return Response({"message": str(exc)}, status=code or 500)

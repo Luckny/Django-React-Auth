@@ -49,7 +49,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
         try:
             # send email for confirmation
-            send_confirmation_email(user.email, otp.code, user.pk)
+            send_confirmation_email(user.email, otp.code)
         except Exception:  # pragma no cover
             # If sending email fails, delete the user and otp
             user.delete()
